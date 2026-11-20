@@ -1,4 +1,5 @@
 import pandas as pd 
+import random as rd
  
 #arquivo excel a ser tratado 
  
@@ -37,19 +38,13 @@ print(df.head())
 
 df[["BLOCO","APARTAMENTO"]] = df["BLOCO/APTO"].str.split("/", expand = True)
 
-df =  df.drop(columns = ["BLOCO/APTO"])
+df = df.drop(columns = ["BLOCO/APTO"])
  
 #calculo de consumo de media 
  
 df["consumo_medio"] = (  
     df["consumo"] - df["MEDIA"] 
     ) 
- 
-#calculo de percentual de media 
- 
-df["percentual_media"] = (  
-    df["consumo"] / df["MEDIA"] * 100 
-    ).round(2) 
  
 #classificação de consumo 
  
@@ -59,7 +54,7 @@ def classificar(row):
         return "Sem consumo" 
      
     elif row["consumo"] > row["MEDIA"] * 1.5: 
-            return "Muito acima da média" 
+        return "Muito acima da média" 
  
     elif row["consumo"] > row["MEDIA"]: 
         return "Acima da média" 
@@ -75,6 +70,71 @@ df["classificacao"] = df.apply(
      axis=1 
 ) 
 
+#dado simulado de conta de água no fim do mês 
+dias = 31
+
+def calcular_conta(consumo):
+    faixas = [
+        (15, 7.41),
+        (30, 18.69),
+        (45, 25.48),
+        (60, 50.97),
+        (float("inf"), 67.96)
+    ]
+
+    valor_agua = 0
+    consumo_anterior = 0
+
+    for limite, tarifa in faixas:
+        quantidade = max(0, min(consumo, limite) - consumo_anterior)
+
+        if quantidade > 0:
+            valor_agua += quantidade * tarifa
+
+        consumo_anterior = limite
+
+        if consumo <= limite:
+            break
+
+    valor_esgoto = 34.41
+    valor_total = valor_agua + valor_esgoto
+
+    return round(valor_agua, 2), round(valor_esgoto, 2), round(valor_total, 2)
+
+consumos = []
+valores_agua = []
+valores_esgoto = []
+valores = []
+
+for _, apartamento in df.iterrows():
+
+    consumo_diario = []
+
+    media_diaria = apartamento["consumo"] / dias
+
+    for dia in range(1, dias + 1):
+
+        consumo = rd.uniform(
+            media_diaria * 0.7,
+            media_diaria * 1.3
+        )
+
+        consumo_diario.append(round(consumo, 2))
+
+    consumo_total = round(sum(consumo_diario), 2)
+
+    valor_agua, valor_esgoto, valor_conta = calcular_conta(consumo_total)
+
+    consumos.append(consumo_total)
+    valores_agua.append(valor_agua)
+    valores_esgoto.append(valor_esgoto)
+    valores.append(valor_conta)
+
+df["consumo_simulado"] = consumos
+df["valor_agua"] = valores_agua
+df["valor_esgoto"] = valores_esgoto
+df["valor_conta"] = valores
+
 #salvar arquivo tratado 
  
 df.to_excel( 
@@ -83,5 +143,5 @@ df.to_excel(
 ) 
  
 #resultado final 
- 
+
 print("Tratamento Concluido!")
