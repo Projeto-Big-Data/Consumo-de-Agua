@@ -19,6 +19,7 @@ O projeto tem como objetivo coletar, organizar e tratar dados sobre consumo de �
 * Cálculo da diferença entre consumo e média
 * Cálculo do percentual de consumo
 * Classificação dos apartamentos
+* Calculo do valores de consumo de água, taxa de esgoto e valor total da conta de aguá
 
 # Objetivo final: 🥇
-Facilitar o acompanhamento do consumo de água, permitindo identificar diferenças entre apartamentos e blocos.
+Facilitar o acompanhamento do consumo de água, permitindo identificar diferenças entre apartamentos e blocos, e calcular o valor de conta de água de cada apartamento e bloco.
